@@ -3,10 +3,8 @@ package huego
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 )
 
 type State struct {
@@ -68,21 +66,15 @@ type Status struct {
 	// TODO(dichro): schedules
 }
 	
-func (h *Hub) Status() {
-	if resp, err := http.Get(fmt.Sprintf("http://%s/api/%s/", h.Address, h.Username)); err != nil {
+func (h *Hub) Status() (*Status, error) {
+	resp, err := http.Get(fmt.Sprintf("http://%s/api/%s/", h.Address, h.Username))
+	if err != nil {
 		log.Println(err, resp)
-	} else {
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		sbody := string(body)
-		fmt.Println(sbody)
-		dec := json.NewDecoder(strings.NewReader(sbody))
-		status := Status{}
-		err = dec.Decode(&status)
-		fmt.Println(err, status)
+		return nil, err
 	}
+	defer resp.Body.Close()
+	dec := json.NewDecoder(resp.Body)
+	status := &Status{}
+	err = dec.Decode(status)
+	return status, err
 }
