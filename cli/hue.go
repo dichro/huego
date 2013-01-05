@@ -9,14 +9,14 @@ import (
 
 var (
 	username = flag.String("username", "", "username for Hue hub")
-	address = flag.String("address", "", "address of Hue hub")
+	address  = flag.String("address", "", "address of Hue hub")
 )
 
 func main() {
 	flag.Parse()
 	hub := &huego.Hub{
 		Username: *username,
-		Address: *address,
+		Address:  *address,
 	}
 	args := flag.Args()
 	if len(args) == 1 && args[0] == "list" {
