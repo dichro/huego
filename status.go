@@ -11,10 +11,24 @@ import (
 
 type State struct {
 	On bool `json:"on"`
+	Brightness int `json:"bri"`
+	Hue int `json:"hue"`
+	Saturation int `json:"sat"`
+	CIE []float32 `json:"xy"`
+	Mireds int `json:"ct"`
+	Alert string `json:"alert"`
+	Effect string `json:"effect"`
+	ColourMode string `json:"colormode"`
+	Reachable bool `json:"reachable"`
 }
 
 type Light struct {
 	State State `json:"state"`
+	Type string `json:"type"`
+	Name string `json:"name"`
+	Model string `json:"modelid"`
+	SoftwareVer string `json:"swversion"`
+	// what's a pointsymbol?
 }
 
 type Status struct {
