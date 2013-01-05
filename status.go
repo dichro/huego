@@ -31,8 +31,22 @@ type Light struct {
 	// what's a pointsymbol?
 }
 
+type Config struct {
+	Name string `json:"name"`
+	MAC string `json:"mac"`
+	DHCP bool `json:"dhcp"`
+	IP string `json:"ipaddress"`
+	Netmask string `json:"netmask"`
+	Gateway string `json:"gateway"`
+	ProxyIP string `json:"proxyaddress"`
+	ProxyPort int `json:"proxyport"`
+	UTC string
+}
+
 type Status struct {
 	Lights map[string]Light `json:"lights"`
+	// TODO(dichro): groups
+	Config Config `json:"config"`
 }
 	
 func (h *Hub) Status() {
