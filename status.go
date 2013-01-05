@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type State struct {
@@ -27,6 +28,14 @@ type Light struct {
 	Model string `json:"modelid"`
 	SoftwareVersion string `json:"swversion"`
 	// what's a pointsymbol?
+}
+
+func (l Light) String() string {
+	state := "off"
+	if l.State.On {
+		state = "on"
+	}
+	return fmt.Sprintf("%s: %s", l.Name, state)
 }
 
 type ACL struct {
@@ -77,4 +86,27 @@ func (h *Hub) Status() (*Status, error) {
 	status := &Status{}
 	err = dec.Decode(status)
 	return status, err
+}
+
+
+func (h *Hub) SetLightState(light string, state State) error {
+	data, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%s/api/%s/lights/%s/state", h.Address, h.Username, light), strings.NewReader(string(data)))
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println(err, resp)
+		return err
+	}
+	defer resp.Body.Close()
+	dec := json.NewDecoder(resp.Body)
+	ret := make(map[string]interface{})
+	err = dec.Decode(ret)
+	fmt.Println(ret)
+	return err
 }

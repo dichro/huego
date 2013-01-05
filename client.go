@@ -6,4 +6,3 @@ package huego
 type Hub struct {
 	Username, Address string
 }
-
