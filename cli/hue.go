@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strconv"
 
 	"github.com/dichro/huego"
 )
@@ -27,7 +28,30 @@ func main() {
 		turn(hub, args)
 		return
 	}
+	if len(args) == 3 && args[0] == "temperature" {
+		temp(hub, args)
+		return
+	}
 	usage(args)
+}
+
+func temp(hub *huego.Hub, args []string) {
+	status, err := hub.Status()
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	name := args[1]
+	temp, err := strconv.ParseInt(args[2], 10, 32)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	for key, light := range status.Lights {
+		if light.Name == name {
+			hub.ChangeLight(key).Transition(5).Temperature(int(temp)).Send()
+		}
+	}
 }
 
 func turn(hub *huego.Hub, args []string) {
