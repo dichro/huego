@@ -80,19 +80,25 @@ func (c *Change) Transition(centiSeconds int) *Change {
 	return c
 }
 
-// Temperature sets the colour temperature requested by this change.
+// Temperature sets the requested colour temperature.
 func (c *Change) Temperature(temp int) *Change {
 	c.params["ct"] = temp
 	return c
 }
 
-// Send dispatches this change to the light.
+// Brightness sets the requested brightness.
+func (c *Change) Brightness(bri int) *Change {
+	c.params["bri"] = bri
+	return c
+}
+
+// Send dispatches all the requested changes to the light.
 func (c *Change) Send() error {
 	data, err := json.Marshal(c.params)
 	if err != nil {
 		return err
 	}
-	fmt.Println("sending", string(data))
+	log.Println("request", string(data))
 	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%s/api/%s/lights/%s/state", c.hub.Address, c.hub.Username, c.id), strings.NewReader(string(data)))
 	if err != nil {
 		return err
@@ -106,6 +112,6 @@ func (c *Change) Send() error {
 	// TODO(dichro): what does this actually return?
 	dec := json.NewDecoder(resp.Body)
 	ret := make(map[string]interface{})
-	log.Println("request returned", ret)
+	log.Println("response", ret)
 	return dec.Decode(ret)
 }

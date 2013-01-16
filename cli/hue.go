@@ -32,7 +32,30 @@ func main() {
 		temp(hub, args)
 		return
 	}
+	if len(args) == 3 && args[0] == "brightness" {
+		brightness(hub, args)
+		return
+	}
 	usage(args)
+}
+
+func brightness(hub *huego.Hub, args []string) {
+	status, err := hub.Status()
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	name := args[1]
+	bri, err := strconv.ParseInt(args[2], 10, 32)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	for key, light := range status.Lights {
+		if light.Name == name {
+			hub.ChangeLight(key).Transition(5).Brightness(int(bri)).Send()
+		}
+	}
 }
 
 func temp(hub *huego.Hub, args []string) {
