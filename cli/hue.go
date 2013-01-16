@@ -39,9 +39,7 @@ func turn(hub *huego.Hub, args []string) {
 	name := args[2]
 	for key, light := range status.Lights {
 		if light.Name == name {
-			s := light.State
-			s.On = args[1] == "on"
-			hub.SetLightState(key, s)
+			hub.ChangeLight(key).State(args[1] == "on").Send()
 		}
 	}
 }
