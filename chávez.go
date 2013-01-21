@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 
 	"github.com/dichro/huego"
 )
@@ -13,18 +14,23 @@ var (
 	ok = []byte("OK")
 	username = flag.String("username", "", "username for Hue hub")
 	address  = flag.String("address", "", "address of Hue hub")
-	re = regexp.MustCompile("^/lights/([A-Za-z0-9' ]+)/([0-9]+)$")
+	re = regexp.MustCompile("^/[a-z]+/([A-Za-z0-9' ]+)/([.0-9]+)$")
 )
 
 
-func tristateLivingRoom(w http.ResponseWriter, req *http.Request) {
+func setBrightness(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	groups := re.FindStringSubmatch(req.URL.Path)
 	if len(groups) != 3 {
 		w.Write([]byte("bad"))
 		return
 	}
-	name, state := groups[1], groups[2]
+	name := groups[1]
+	bri, err := strconv.ParseFloat(groups[2], 64)
+	if err != nil {
+		w.Write([]byte("bad"))
+		return
+	}
 	hub := &huego.Hub{
 		Username: *username,
 		Address:  *address,
@@ -40,9 +46,7 @@ func tristateLivingRoom(w http.ResponseWriter, req *http.Request) {
 			continue
 		}
 		found = true
-		s := light.State
-		s.On = state != "0"
-		hub.SetLightState(key, s)
+		hub.ChangeLight(key).Transition(5).Brightness(int(255 * bri)).Send()
 		break
 	}
 	if found {
@@ -59,30 +63,28 @@ func motionAtEntry(w http.ResponseWriter, req *http.Request) {
 }
 
 // call to signal all lights off.
-func allOff(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	hub := &huego.Hub{
-		Username: *username,
-		Address:  *address,
-	}
-	status, err := hub.Status()
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-	for key, light := range status.Lights {
-		s := light.State
-		s.On = false
-		hub.SetLightState(key, s)
-	}
-	w.Write(ok)
-}
+// func allOff(w http.ResponseWriter, req *http.Request) {
+// 	w.Header().Set("Content-Type", "text/plain")
+// 	hub := &huego.Hub{
+// 		Username: *username,
+// 		Address:  *address,
+// 	}
+// 	status, err := hub.Status()
+// 	if err != nil {
+// 		w.Write([]byte(err.Error()))
+// 		return
+// 	}
+// 	for key, light := range status.Lights {
+// 		s := light.State
+// 		s.On = false
+// 		hub.SetLightState(key, s)
+// 	}
+// 	w.Write(ok)
+// }
 
 func main() {
 	flag.Parse()
-	http.HandleFunc("/lights/", tristateLivingRoom)
-	http.HandleFunc("/motionAtEntry", motionAtEntry)
-	http.HandleFunc("/allOff", allOff)
+	http.HandleFunc("/lights/", setBrightness)
 	log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
 	err := http.ListenAndServe(":10443", nil)
 	if err != nil {
