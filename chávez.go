@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"log"
 	"net/http"
@@ -18,17 +19,15 @@ var (
 )
 
 
-func setBrightness(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
+func parseURL(req *http.Request) (c *huego.Change, v float64, err error) {
 	groups := re.FindStringSubmatch(req.URL.Path)
 	if len(groups) != 3 {
-		w.Write([]byte("bad"))
+		err = errors.New("parse error")
 		return
 	}
 	name := groups[1]
-	bri, err := strconv.ParseFloat(groups[2], 64)
+	v, err = strconv.ParseFloat(groups[2], 64)
 	if err != nil {
-		w.Write([]byte("bad"))
 		return
 	}
 	hub := &huego.Hub{
@@ -37,22 +36,37 @@ func setBrightness(w http.ResponseWriter, req *http.Request) {
 	}
 	status, err := hub.Status()
 	if err != nil {
-		w.Write([]byte(err.Error()))
 		return
 	}
-	found := false
 	for key, light := range status.Lights {
-		if light.Name != name {
-			continue
+		if light.Name == name {
+			c = hub.ChangeLight(key)
+			return
 		}
-		found = true
-		hub.ChangeLight(key).Transition(5).Brightness(int(255 * bri)).Send()
-		break
 	}
-	if found {
+	err = errors.New("unknown light name")
+	return
+}
+
+func setBrightness(w http.ResponseWriter, req *http.Request) {
+	change, arg, err := parseURL(req)
+	w.Header().Set("Content-Type", "text/plain")
+	if err == nil {
+		change.Transition(5).Brightness(int(255 * arg)).Send()
 		w.Write(ok)
 	} else {
-		w.Write([]byte("not found"))
+		w.Write([]byte(err.Error()))
+	}
+}
+
+func setTemperature(w http.ResponseWriter, req *http.Request) {
+	change, arg, err := parseURL(req)
+	w.Header().Set("Content-Type", "text/plain")
+	if err == nil {
+		change.Transition(5).Temperature(500 - int((500-154) * arg)).Send()
+		w.Write(ok)
+	} else {
+		w.Write([]byte(err.Error()))
 	}
 }
 
@@ -84,7 +98,8 @@ func motionAtEntry(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	flag.Parse()
-	http.HandleFunc("/lights/", setBrightness)
+	http.HandleFunc("/brightness/", setBrightness)
+	http.HandleFunc("/temperature/", setTemperature)
 	log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
 	err := http.ListenAndServe(":10443", nil)
 	if err != nil {
