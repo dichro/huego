@@ -74,7 +74,7 @@ func setState(w http.ResponseWriter, req *http.Request) {
 	change, arg, err := parseURL(req)
 	w.Header().Set("Content-Type", "text/plain")
 	if err == nil {
-		change.Transition(5).State(arg > 0.5).Send()
+		change.State(arg > 0.5).Send()
 		w.Write(ok)
 	} else {
 		w.Write([]byte(err.Error()))
