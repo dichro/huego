@@ -70,6 +70,17 @@ func setTemperature(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func setState(w http.ResponseWriter, req *http.Request) {
+	change, arg, err := parseURL(req)
+	w.Header().Set("Content-Type", "text/plain")
+	if err == nil {
+		change.Transition(5).State(arg > 0.5).Send()
+		w.Write(ok)
+	} else {
+		w.Write([]byte(err.Error()))
+	}
+}
+
 // call to signal that motion has been detected at the front door.
 func motionAtEntry(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
@@ -100,6 +111,7 @@ func main() {
 	flag.Parse()
 	http.HandleFunc("/brightness/", setBrightness)
 	http.HandleFunc("/temperature/", setTemperature)
+	http.HandleFunc("/state/", setState)
 	log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
 	err := http.ListenAndServe(":10443", nil)
 	if err != nil {
