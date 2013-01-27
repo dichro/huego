@@ -15,24 +15,27 @@ var (
 	ok       = []byte("OK")
 	username = flag.String("username", "", "username for Hue hub")
 	address  = flag.String("address", "", "address of Hue hub")
-	re       = regexp.MustCompile("^/[a-z]+/([A-Za-z0-9' ]+)/([.0-9]+)(,([.0-9]+))$")
+	re       = regexp.MustCompile("^/[a-z]+/([A-Za-z0-9' ]+)/([.0-9]+)(,([.0-9]+))?$")
 )
 
 func parseURL(req *http.Request) (c *huego.Change, vs []float64, err error) {
 	groups := re.FindStringSubmatch(req.URL.Path)
 	if len(groups) < 3 || len(groups) > 5 {
+		log.Printf("Parse failed. Request %q parsed into %d groups.", req.URL.Path, len(groups))
 		err = errors.New("parse error")
 		return
 	}
 	name := groups[1]
 	v, err := strconv.ParseFloat(groups[2], 64)
 	if err != nil {
+		log.Printf("Parse failed. Request %q has non-arg %q.", req.URL.Path, groups[2])
 		return
 	}
 	vs = append(vs, v)
-	if len(groups) > 4 {
+	if len(groups) > 4 && len(groups[4]) > 0 {
 		v, err = strconv.ParseFloat(groups[4], 64)
 		if err != nil {
+			log.Printf("Parse failed. Request %q has non-arg %q.", req.URL.Path, groups[4])
 			return
 		}
 		vs = append(vs, v)
@@ -43,6 +46,7 @@ func parseURL(req *http.Request) (c *huego.Change, vs []float64, err error) {
 	}
 	status, err := hub.Status()
 	if err != nil {
+		log.Printf("Request failed. Hub status returned %s.", err.Error())
 		return
 	}
 	for key, light := range status.Lights {
@@ -51,6 +55,7 @@ func parseURL(req *http.Request) (c *huego.Change, vs []float64, err error) {
 			return
 		}
 	}
+	log.Printf("Request failed. Unknown light %q.", name)
 	err = errors.New("unknown light name")
 	return
 }
