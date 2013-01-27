@@ -36,7 +36,35 @@ func main() {
 		brightness(hub, args)
 		return
 	}
+	if len(args) == 4 && args[0] == "colour" {
+		colour(hub, args)
+		return
+	}
 	usage(args)
+}
+
+func colour(hub *huego.Hub, args []string) {
+	status, err := hub.Status()
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	name := args[1]
+	hue, err := strconv.ParseInt(args[2], 10, 32)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	sat, err := strconv.ParseInt(args[3], 10, 32)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	for key, light := range status.Lights {
+		if light.Name == name {
+			hub.ChangeLight(key).Transition(5).Colour(int(hue), int(sat)).Send()
+		}
+	}
 }
 
 func brightness(hub *huego.Hub, args []string) {

@@ -92,6 +92,12 @@ func (c *Change) Brightness(bri int) *Change {
 	return c
 }
 
+// Colour sets the requested colour.
+func (c *Change) Colour(hue, saturation int) *Change {
+	c.params["hue"], c.params["sat"] = hue, saturation
+	return c
+}
+
 // Send dispatches all the requested changes to the light.
 func (c *Change) Send() error {
 	data, err := json.Marshal(c.params)
