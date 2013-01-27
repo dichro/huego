@@ -50,8 +50,8 @@ func (l Light) change() *Change {
 
 // Change describes a set of pending changes to the state of a light.
 type Change struct {
-	hub *Hub
-	id string
+	hub    *Hub
+	id     string
 	params map[string]interface{}
 }
 

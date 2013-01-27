@@ -59,8 +59,8 @@ func (h *Hub) Status() (*Status, error) {
 
 func (h *Hub) ChangeLight(light string) *Change {
 	return &Change{
-		hub: h,
-		id: light,
+		hub:    h,
+		id:     light,
 		params: make(map[string]interface{}),
 	}
 }
