@@ -7,6 +7,8 @@
 
  # You'll need to use the MAC address of your phone here
 DEVICE="${1:-no MAC set}"
+LIGHT="${2:-no light name set}"
+CONNECT="${3:-http://localhost:10443/}"
 
 # How often to check the distance between phone and computer in seconds
 NEAR_CHECK_INTERVAL=5
@@ -26,7 +28,7 @@ function msg {
 }
 
 name=`$HCITOOL name $DEVICE`
-msg "Monitoring proximity of \"$name\" [$DEVICE]";
+msg "Controlling ${LIGHT} via \"$name\" [${DEVICE}] proximity through ${CONNECT}"
 
 state="far"
 while /bin/true; do
@@ -34,14 +36,14 @@ while /bin/true; do
             if [[ "$state" == "far" ]]; then
                 msg "*** Device \"$name\" [$DEVICE] is within proximity"
                 state="near"
-                $NEAR_CMD > /dev/null 2>&1
+		curl "${CONNECT}state/${LIGHT}/1"
             fi
             sleep ${NEAR_CHECK_INTERVAL}
         else
             if [[ "$state" == "near" ]]; then
                 msg "*** Device \"$name\" [$DEVICE] has left proximity"
                 state="far"
-                $FAR_CMD > /dev/null 2>&1
+		curl "${CONNECT}state/${LIGHT}/0"
             fi
             sleep ${FAR_CHECK_INTERVAL}
         fi
