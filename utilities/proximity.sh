@@ -11,14 +11,8 @@ LIGHT="${2:-no light name set}"
 CONNECT="${3:-http://localhost:10443/}"
 
 # How often to check the distance between phone and computer in seconds
-NEAR_CHECK_INTERVAL=5
-FAR_CHECK_INTERVAL=5
-
-# The command to run when your phone gets too far away
-FAR_CMD='(echo far; date) >> /tmp/log'
-
-# The command to run when your phone is close again
-NEAR_CMD='(echo near; date) >> /tmp/log'
+NEAR_CHECK_INTERVAL=900
+FAR_CHECK_INTERVAL=10
 
 HCITOOL="/usr/bin/hcitool"
 DEBUG="/tmp/btproximity.log"
