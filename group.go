@@ -23,26 +23,10 @@ type Group struct {
 	Name   string   `json:"name"`
 }
 
-func (g *Group) Switch() *GroupChange {
-	return &GroupChange{
-		group: g,
+func (g *Group) Switch() *Change {
+	return &Change{
+		hub: g.hub,
+		path: fmt.Sprintf("groups/%s/action", g.id),
 		params: make(map[string]interface{}),
 	}
-}
-
-type GroupChange struct {
-	group *Group
-	params map[string]interface{}
-}
-
-// State requests that the light be set to the requested state.
-func (c *GroupChange) State(on bool) *GroupChange {
-	c.params["on"] = on
-	return c
-}
-
-// Send dispatches all the requested changes to the light.
-func (c *GroupChange) Send() error {
-	_, err := c.group.hub.Put(fmt.Sprintf("groups/%s/action", c.group.id), c.params, nil)
-	return err
 }

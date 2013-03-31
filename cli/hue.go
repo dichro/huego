@@ -60,9 +60,9 @@ func colour(hub *huego.Hub, args []string) {
 		fmt.Println("error:", err)
 		return
 	}
-	for key, light := range status.Lights {
+	for _, light := range status.Lights {
 		if light.Name == name {
-			hub.ChangeLight(key).Transition(5).Colour(int(hue), int(sat)).Send()
+			light.Switch().Transition(5).Colour(int(hue), int(sat)).Send()
 		}
 	}
 }
@@ -79,9 +79,9 @@ func brightness(hub *huego.Hub, args []string) {
 		fmt.Println("error:", err)
 		return
 	}
-	for key, light := range status.Lights {
+	for _, light := range status.Lights {
 		if light.Name == name {
-			hub.ChangeLight(key).Transition(5).Brightness(int(bri)).Send()
+			light.Switch().Transition(5).Brightness(int(bri)).Send()
 		}
 	}
 }
@@ -98,9 +98,9 @@ func temp(hub *huego.Hub, args []string) {
 		fmt.Println("error:", err)
 		return
 	}
-	for key, light := range status.Lights {
+	for _, light := range status.Lights {
 		if light.Name == name {
-			hub.ChangeLight(key).Transition(5).Temperature(int(temp)).Send()
+			light.Switch().Transition(5).Temperature(int(temp)).Send()
 		}
 	}
 }
@@ -119,9 +119,9 @@ func turn(hub *huego.Hub, args []string) {
 			return
 		}
 	}
-	for key, light := range status.Lights {
+	for _, light := range status.Lights {
 		if light.Name == name {
-			hub.ChangeLight(key).State(args[1] == "on").Send()
+			light.Switch().State(args[1] == "on").Send()
 			return
 		}
 	}
