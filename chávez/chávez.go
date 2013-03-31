@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -16,6 +17,7 @@ var (
 	username = flag.String("username", "", "username for Hue hub")
 	address  = flag.String("address", "", "address of Hue hub")
 	re       = regexp.MustCompile("^/[a-z]+/([A-Za-z0-9' ]+)/([.0-9]+)(,([.0-9]+))?$")
+	port     = flag.Int("port", 10443, "port to listen on")
 )
 
 func parseURL(req *http.Request) (c *huego.Change, vs []float64, err error) {
@@ -134,8 +136,7 @@ func main() {
 	http.HandleFunc("/temperature/", setTemperature)
 	http.HandleFunc("/state/", setState)
 	http.HandleFunc("/colour/", setColour)
-	log.Printf("About to listen on 10443. Go to https://127.0.0.1:10443/")
-	err := http.ListenAndServe(":10443", nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
