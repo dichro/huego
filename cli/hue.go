@@ -112,11 +112,20 @@ func turn(hub *huego.Hub, args []string) {
 		return
 	}
 	name := args[2]
+	for _, group := range status.Groups {
+		if group.Name == name {
+			fmt.Println(group.Name)
+			group.Switch().State(args[1] == "on").Send()
+			return
+		}
+	}
 	for key, light := range status.Lights {
 		if light.Name == name {
 			hub.ChangeLight(key).State(args[1] == "on").Send()
+			return
 		}
 	}
+	fmt.Println(name, " not found")
 }
 
 func list(hub *huego.Hub, args []string) {
