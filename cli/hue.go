@@ -20,7 +20,7 @@ func main() {
 		Address:  *address,
 	}
 	args := flag.Args()
-	if len(args) == 1 && args[0] == "list" {
+	if len(args) == 2 && args[0] == "list" {
 		list(hub, args)
 		return
 	}
@@ -125,8 +125,17 @@ func list(hub *huego.Hub, args []string) {
 		fmt.Println("error:", err)
 		return
 	}
-	for _, light := range status.Lights {
-		fmt.Println(light)
+	switch args[1] {
+	case "lights":
+		for _, light := range status.Lights {
+			fmt.Println(light)
+		}
+	case "groups":
+		for _, group := range status.Groups {
+			fmt.Println(group)
+		}
+	default:
+		fmt.Println("lights|groups")
 	}
 }
 
