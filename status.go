@@ -38,10 +38,10 @@ type Config struct {
 }
 
 type Status struct {
-	hub *Hub
+	hub    *Hub
 	Lights map[string]*Light `json:"lights"`
 	Groups map[string]*Group `json:"groups"`
-	Config Config           `json:"config"`
+	Config Config            `json:"config"`
 	// TODO(dichro): schedules
 }
 

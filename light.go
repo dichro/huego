@@ -6,8 +6,8 @@ import (
 
 // Light describes various parameters of a light, as returned from the hub.
 type Light struct {
-	hub *Hub
-	id string
+	hub             *Hub
+	id              string
 	State           State  `json:"state"`
 	Type            string `json:"type"`
 	Name            string `json:"name"`
@@ -40,8 +40,8 @@ func (l Light) String() string {
 
 func (l *Light) Switch() *Change {
 	return &Change{
-		hub: l.hub,
-		path: fmt.Sprintf("lights/%s/state", l.id),
+		hub:    l.hub,
+		path:   fmt.Sprintf("lights/%s/state", l.id),
 		params: make(map[string]interface{}),
 	}
 }

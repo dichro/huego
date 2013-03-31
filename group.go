@@ -16,8 +16,8 @@ type Action struct {
 }
 
 type Group struct {
-	hub *Hub
-	id string
+	hub    *Hub
+	id     string
 	Action Action   `json:"action"`
 	Lights []string `json:"lights"`
 	Name   string   `json:"name"`
@@ -25,8 +25,8 @@ type Group struct {
 
 func (g *Group) Switch() *Change {
 	return &Change{
-		hub: g.hub,
-		path: fmt.Sprintf("groups/%s/action", g.id),
+		hub:    g.hub,
+		path:   fmt.Sprintf("groups/%s/action", g.id),
 		params: make(map[string]interface{}),
 	}
 }

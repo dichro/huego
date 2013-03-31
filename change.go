@@ -3,7 +3,7 @@ package huego
 // Change describes a set of pending changes to the state of a light.
 type Change struct {
 	hub    *Hub
-	path     string
+	path   string
 	params map[string]interface{}
 }
 
