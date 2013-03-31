@@ -1,11 +1,7 @@
 package huego
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
-	"strings"
 )
 
 // Light describes various parameters of a light, as returned from the hub.
@@ -100,24 +96,6 @@ func (c *Change) Colour(hue, saturation int) *Change {
 
 // Send dispatches all the requested changes to the light.
 func (c *Change) Send() error {
-	data, err := json.Marshal(c.params)
-	if err != nil {
-		return err
-	}
-	log.Println("request", string(data))
-	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%s/api/%s/lights/%s/state", c.hub.Address, c.hub.Username, c.id), strings.NewReader(string(data)))
-	if err != nil {
-		return err
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Println(err, resp)
-		return err
-	}
-	defer resp.Body.Close()
-	// TODO(dichro): what does this actually return?
-	dec := json.NewDecoder(resp.Body)
-	ret := make(map[string]interface{})
-	log.Println("response", ret)
-	return dec.Decode(ret)
+	_, err := c.hub.Put(fmt.Sprintf("lights/%s/state", c.id), c.params, nil)
+	return err
 }
