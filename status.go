@@ -45,16 +45,6 @@ type Status struct {
 	// TODO(dichro): schedules
 }
 
-// assign updates all useful state in Status and its children and must
-// be called after json parsing.
-func (s *Status) assign(h *Hub) {
-	s.hub = h
-	for id, group := range s.Groups {
-		group.status = s
-		group.id = id
-	}
-}
-
 func (h *Hub) Status() (*Status, error) {
 	resp, err := http.Get(fmt.Sprintf("http://%s/api/%s/", h.Address, h.Username))
 	if err != nil {
@@ -65,7 +55,15 @@ func (h *Hub) Status() (*Status, error) {
 	dec := json.NewDecoder(resp.Body)
 	status := &Status{}
 	err = dec.Decode(status)
-	status.assign(h)
+	status.hub = h
+	for id, group := range status.Groups {
+		group.hub = h
+		group.id = id
+	}
+	for id, light := range status.Lights {
+		light.hub = h
+		light.id = id
+	}
 	return status, err
 }
 

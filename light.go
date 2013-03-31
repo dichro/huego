@@ -6,6 +6,8 @@ import (
 
 // Light describes various parameters of a light, as returned from the hub.
 type Light struct {
+	hub *Hub
+	id string
 	State           State  `json:"state"`
 	Type            string `json:"type"`
 	Name            string `json:"name"`

@@ -16,7 +16,7 @@ type Action struct {
 }
 
 type Group struct {
-	status *Status
+	hub *Hub
 	id string
 	Action Action   `json:"action"`
 	Lights []string `json:"lights"`
@@ -43,6 +43,6 @@ func (c *GroupChange) State(on bool) *GroupChange {
 
 // Send dispatches all the requested changes to the light.
 func (c *GroupChange) Send() error {
-	_, err := c.group.status.hub.Put(fmt.Sprintf("groups/%s/action", c.group.id), c.params, nil)
+	_, err := c.group.hub.Put(fmt.Sprintf("groups/%s/action", c.group.id), c.params, nil)
 	return err
 }
