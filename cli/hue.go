@@ -60,10 +60,10 @@ func colour(hub *huego.Hub, args []string) {
 		fmt.Println("error:", err)
 		return
 	}
-	for _, light := range status.Lights {
-		if light.Name == name {
-			light.Switch().Transition(5).Colour(int(hue), int(sat)).Send()
-		}
+	if sw := status.FindSwitchable(name); sw != nil {
+		sw.Switch().Transition(5).Colour(int(hue), int(sat)).Send()
+	} else {
+		fmt.Println(name, " not found")
 	}
 }
 
@@ -79,10 +79,10 @@ func brightness(hub *huego.Hub, args []string) {
 		fmt.Println("error:", err)
 		return
 	}
-	for _, light := range status.Lights {
-		if light.Name == name {
-			light.Switch().Transition(5).Brightness(int(bri)).Send()
-		}
+	if sw := status.FindSwitchable(name); sw != nil {
+		sw.Switch().Transition(5).Brightness(int(bri)).Send()
+	} else {
+		fmt.Println(name, " not found")
 	}
 }
 
@@ -98,10 +98,10 @@ func temp(hub *huego.Hub, args []string) {
 		fmt.Println("error:", err)
 		return
 	}
-	for _, light := range status.Lights {
-		if light.Name == name {
-			light.Switch().Transition(5).Temperature(int(temp)).Send()
-		}
+	if sw := status.FindSwitchable(name); sw != nil {
+		sw.Switch().Transition(5).Temperature(int(temp)).Send()
+	} else {
+		fmt.Println(name, " not found")
 	}
 }
 
@@ -112,20 +112,11 @@ func turn(hub *huego.Hub, args []string) {
 		return
 	}
 	name := args[2]
-	for _, group := range status.Groups {
-		if group.Name == name {
-			fmt.Println(group.Name)
-			group.Switch().State(args[1] == "on").Send()
-			return
-		}
+	if sw := status.FindSwitchable(name); sw != nil {
+		sw.Switch().State(args[1] == "on").Send()
+	} else {
+		fmt.Println(name, " not found")
 	}
-	for _, light := range status.Lights {
-		if light.Name == name {
-			light.Switch().State(args[1] == "on").Send()
-			return
-		}
-	}
-	fmt.Println(name, " not found")
 }
 
 func list(hub *huego.Hub, args []string) {

@@ -45,6 +45,24 @@ type Status struct {
 	// TODO(dichro): schedules
 }
 
+type Switchable interface {
+	Switch() *Change
+}
+
+func (s *Status) FindSwitchable(name string) Switchable {
+	for _, group := range s.Groups {
+		if group.Name == name {
+			return group
+		}
+	}
+	for _, light := range s.Lights {
+		if light.Name == name {
+			return light
+		}
+	}
+	return nil
+}
+
 func (h *Hub) Status() (*Status, error) {
 	resp, err := http.Get(fmt.Sprintf("http://%s/api/%s/", h.Address, h.Username))
 	if err != nil {

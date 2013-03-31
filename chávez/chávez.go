@@ -49,14 +49,12 @@ func parseURL(req *http.Request) (c *huego.Change, vs []float64, err error) {
 		log.Printf("Request failed. Hub status returned %s.", err.Error())
 		return
 	}
-	for key, light := range status.Lights {
-		if light.Name == name {
-			c = hub.ChangeLight(key)
-			return
-		}
+	if sw := status.FindSwitchable(name); sw != nil {
+		c = sw.Switch()
+	} else {
+		log.Printf("Request failed. Unknown light %q.", name)
+		err = errors.New("unknown light name")
 	}
-	log.Printf("Request failed. Unknown light %q.", name)
-	err = errors.New("unknown light name")
 	return
 }
 
