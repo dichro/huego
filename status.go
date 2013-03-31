@@ -37,10 +37,27 @@ type Config struct {
 	PortalServices  bool           `json:"portalservices"`
 }
 
+type Action struct {
+	On         bool      `json:"on"`
+	Brightness int       `json:"bri"`
+	Hue        int       `json:"hue"`
+	Saturation int       `json:"sat"`
+	CIE        []float32 `json:"xy"`
+	Mireds     int       `json:"ct"`
+	Effect     string    `json:"effect"`
+	ColourMode string    `json:"colormode"`
+}
+
+type Group struct {
+	Action Action   `json:"action"`
+	Lights []string `json:"lights"`
+	Name   string   `json:"name"`
+}
+
 type Status struct {
 	Lights map[string]Light `json:"lights"`
-	// TODO(dichro): groups
-	Config Config `json:"config"`
+	Groups map[string]Group `json:"groups"`
+	Config Config           `json:"config"`
 	// TODO(dichro): schedules
 }
 
