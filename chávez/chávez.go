@@ -20,6 +20,21 @@ var (
 	port     = flag.Int("port", 10443, "port to listen on")
 )
 
+func findLight(name string) (*huego.Change, error) {
+	hub := &huego.Hub{
+		Username: *username,
+		Address:  *address,
+	}
+	status, err := hub.Status()
+	if err != nil {
+		return nil, err
+	}
+	if sw := status.FindSwitchable(name); sw != nil {
+		return sw.Switch(), nil
+	}
+	return nil, errors.New("unknown light name")
+}
+
 func parseURL(req *http.Request) (c *huego.Change, vs []float64, err error) {
 	groups := re.FindStringSubmatch(req.URL.Path)
 	if len(groups) < 3 || len(groups) > 5 {
@@ -42,21 +57,7 @@ func parseURL(req *http.Request) (c *huego.Change, vs []float64, err error) {
 		}
 		vs = append(vs, v)
 	}
-	hub := &huego.Hub{
-		Username: *username,
-		Address:  *address,
-	}
-	status, err := hub.Status()
-	if err != nil {
-		log.Printf("Request failed. Hub status returned %s.", err.Error())
-		return
-	}
-	if sw := status.FindSwitchable(name); sw != nil {
-		c = sw.Switch()
-	} else {
-		log.Printf("Request failed. Unknown light %q.", name)
-		err = errors.New("unknown light name")
-	}
+	c, err = findLight(name)
 	return
 }
 
@@ -104,31 +105,17 @@ func setColour(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// call to signal that motion has been detected at the front door.
-func motionAtEntry(w http.ResponseWriter, req *http.Request) {
+// wakeUp starts the morning wake-up mode.
+func wakeUp(w http.ResponseWriter, req *http.Request) {
+	change, err := findLight("Miki's Bedroom")
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write(ok)
+	if err == nil {
+		change.Transition(100).State(true).Brightness(254).Temperature(154).Send()
+		w.Write(ok)
+	} else {
+		w.Write([]byte(err.Error()))
+	}
 }
-
-// call to signal all lights off.
-// func allOff(w http.ResponseWriter, req *http.Request) {
-// 	w.Header().Set("Content-Type", "text/plain")
-// 	hub := &huego.Hub{
-// 		Username: *username,
-// 		Address:  *address,
-// 	}
-// 	status, err := hub.Status()
-// 	if err != nil {
-// 		w.Write([]byte(err.Error()))
-// 		return
-// 	}
-// 	for key, light := range status.Lights {
-// 		s := light.State
-// 		s.On = false
-// 		hub.SetLightState(key, s)
-// 	}
-// 	w.Write(ok)
-// }
 
 func main() {
 	flag.Parse()
@@ -136,6 +123,7 @@ func main() {
 	http.HandleFunc("/temperature/", setTemperature)
 	http.HandleFunc("/state/", setState)
 	http.HandleFunc("/colour/", setColour)
+	http.HandleFunc("/wakeUp", wakeUp)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	if err != nil {
 		log.Fatal(err)
