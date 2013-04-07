@@ -21,7 +21,7 @@ func (h *Hub) Put(path string, request, response interface{}) (interface{}, erro
 		return nil, err
 	}
 	uri := fmt.Sprintf("http://%s/api/%s/%s", h.Address, h.Username, path)
-	log.Printf("hub PUT [%s]: %q %q", h, uri, request)
+	log.Printf("hub PUT [%s]: %s %s", h, uri, string(data))
 	req, err := http.NewRequest("PUT", uri, strings.NewReader(string(data)))
 	if err != nil {
 		return nil, err
