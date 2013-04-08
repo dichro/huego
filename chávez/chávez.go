@@ -110,7 +110,10 @@ func wakeUp(w http.ResponseWriter, req *http.Request) {
 	change, err := findLight("Miki's Bedroom")
 	w.Header().Set("Content-Type", "text/plain")
 	if err == nil {
-		change.Transition(100).State(true).Brightness(254).Temperature(154).Send()
+		// turn on lights at mildest settings.
+		change.Transition(0).State(true).Brightness(0).Temperature(500).Send()
+		// now bring them up slowly.
+		change.Reset().Transition(3000).Brightness(254).Temperature(154).Send()
 		w.Write(ok)
 	} else {
 		w.Write([]byte(err.Error()))

@@ -7,6 +7,12 @@ type Change struct {
 	params map[string]interface{}
 }
 
+// Reset resets the parameters requested for this change.
+func (c *Change) Reset() *Change {
+	c.params = make(map[string]interface{})
+	return c
+}
+
 // On updates this Change to request that the light be turned on.
 func (c *Change) On() *Change {
 	c.params["on"] = true
